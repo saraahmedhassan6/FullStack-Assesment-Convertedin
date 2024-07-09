@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Process\Process;
 
 class StartApplication extends Command
 {
@@ -27,6 +28,19 @@ class StartApplication extends Command
     {
         $this->info('Starting Laravel application...');
 
+        // Run composer update
+        $this->info('Running composer update...');
+        $this->runExternalCommand('composer update');
+
+        // Install npm packages
+        $this->info('Installing npm packages...');
+        $this->runExternalCommand('npm install');
+
+        // Build the assets
+        $this->info('Building assets...');
+        $this->runExternalCommand('npm run build');
+
+
         // Migrate the database
         $this->call('migrate');
 
@@ -50,6 +64,24 @@ class StartApplication extends Command
             '--queue' => 'default',
             '--tries' => 3,
         ]);
+    }
+
+    protected function runExternalCommand($command)
+    {
+        $process = Process::fromShellCommandline($command);
+        $process->setTimeout(null); // Optional: Set timeout as needed
+        $process->run(function ($type, $buffer) {
+            if (Process::ERR === $type) {
+                $this->error($buffer);
+            } else {
+                $this->info($buffer);
+            }
+        });
+
+        if (!$process->isSuccessful()) {
+            $this->error("Command failed: $command");
+            exit($process->getExitCode());
+        }
     }
 
     // check windos os to start process in BG 
