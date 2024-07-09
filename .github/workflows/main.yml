@@ -35,17 +35,11 @@ jobs:
         php-version: '8.1'
         extensions: mbstring, pdo, pdo_mysql
 
-    - name: Copy .env example
-      run: cp .env.example .env
+    - name: Install NPM dependencies
+      run: npm install
 
-    - name: Update environment variables
-      run: |
-        echo "DB_CONNECTION=mysql" >> .env
-        echo "DB_HOST=127.0.0.1" >> .env
-        echo "DB_PORT=3306" >> .env
-        echo "DB_DATABASE=fullstack_assessment_db" >> .env
-        echo "DB_USERNAME=root" >> .env
-        echo "DB_PASSWORD=" >> .env  # No password
+    - name: Build assets with Vite
+      run: npm run build
 
     - name: Wait for MySQL to be ready
       run: |
@@ -62,11 +56,20 @@ jobs:
     - name: Create database
       run: mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS fullstack_assessment_db;"
 
-    - name: Install Composer dependencies
-      run: composer install --no-scripts
+    - name: Copy .env example
+      run: cp .env.example .env
 
-    - name: Run Composer scripts manually
-      run: composer run-script post-root-package-install && composer run-script post-create-project-cmd && composer run-script post-autoload-dump
+    - name: Update environment variables
+      run: |
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=fullstack_assessment_db" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=" >> .env  # No password
+
+    - name: Install Composer dependencies
+      run: composer install
 
     - name: Generate application key
       run: php artisan key:generate
