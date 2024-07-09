@@ -29,17 +29,11 @@ jobs:
       with:
         node-version: '16'
 
-    - name: Install dependencies
-      run: npm install
-
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.1'
         extensions: mbstring, pdo, pdo_mysql
-
-    - name: Install Composer dependencies
-      run: composer install
 
     - name: Copy .env example
       run: cp .env.example .env
@@ -53,10 +47,9 @@ jobs:
         echo "DB_USERNAME=root" >> .env
         echo "DB_PASSWORD=" >> .env  # No password
 
-    - name: Wait for MySQL to be ready and create database
+    - name: Wait for MySQL to be ready
       run: |
         sudo apt-get install -y mysql-client
-        # Wait for MySQL to be available
         for i in {30..0}; do
           if mysql -h127.0.0.1 -uroot -e 'select 1'; then
             break
@@ -65,10 +58,15 @@ jobs:
           sleep 1
         done
         echo 'MySQL is up - creating database'
-        # Create the database
-        mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS fullstack_assessment_db;"
-        # Ensure the database exists
-        mysql -h 127.0.0.1 -u root -e "SHOW DATABASES;"
+
+    - name: Create database
+      run: mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS fullstack_assessment_db;"
+
+    - name: Install Composer dependencies
+      run: composer install --no-scripts
+
+    - name: Run Composer scripts manually
+      run: composer run-script post-root-package-install && composer run-script post-create-project-cmd && composer run-script post-autoload-dump
 
     - name: Generate application key
       run: php artisan key:generate
