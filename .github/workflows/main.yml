@@ -17,9 +17,9 @@ jobs:
         image: mysql:5.7
         ports:
           - 3306:3306
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - name: Checkout repository
@@ -54,18 +54,17 @@ jobs:
         echo "DB_USERNAME=root" >> .env
         echo "DB_PASSWORD=" >> .env  # No password
 
-    - name: Wait for MySQL to be ready
+    - name: Wait for MySQL to be ready and create database
       run: |
+        sudo apt-get install -y mysql-client
         for i in {30..0}; do
-          mysqladmin ping -h127.0.0.1 -uroot --silent && break
+          if mysql -h127.0.0.1 -uroot -e 'select 1'; then
+            break
+          fi
           echo 'MySQL init process in progress...'
           sleep 1
         done
-
-    - name: Create database
-      run: |
-        sudo apt-get install -y mysql-client
-        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS fullstack_assessment_db;"
+        mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS fullstack_assessment_db;"
 
     - name: Generate application key
       run: php artisan key:generate
