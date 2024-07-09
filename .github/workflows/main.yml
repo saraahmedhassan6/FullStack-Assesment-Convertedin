@@ -23,12 +23,12 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
-        node-version: '16' # Update to a supported Node.js version
+        node-version: '16'
 
     - name: Install dependencies
       run: npm install
@@ -36,7 +36,7 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1' # Update PHP version to 8.1
+        php-version: '8.1'
         extensions: mbstring, pdo, pdo_mysql
 
     - name: Install Composer dependencies
@@ -44,6 +44,15 @@ jobs:
 
     - name: Copy .env example
       run: cp .env.example .env
+
+    - name: Update environment variables
+      run: |
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=fullstack_assessment_db" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=" >> .env
 
     - name: Generate application key
       run: php artisan key:generate
