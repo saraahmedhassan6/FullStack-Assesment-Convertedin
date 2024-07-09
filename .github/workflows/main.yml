@@ -28,7 +28,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '16' # Update to a supported Node.js version
 
     - name: Install dependencies
       run: npm install
@@ -36,7 +36,7 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.4'
+        php-version: '8.1' # Update PHP version to 8.1
         extensions: mbstring, pdo, pdo_mysql
 
     - name: Install Composer dependencies
