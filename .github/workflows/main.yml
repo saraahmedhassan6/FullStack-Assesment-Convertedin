@@ -55,12 +55,13 @@ jobs:
         echo "DB_PASSWORD=" >> .env  # No password
 
     - name: Wait for MySQL to be ready
-      run: sleep 15
+      run: |
+        dockerize -wait tcp://localhost:3306 -timeout 1m
 
     - name: Create database
       run: |
         sudo apt-get install -y mysql-client
-        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE fullstack_assessment_db;"
+        mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE IF NOT EXISTS fullstack_assessment_db;"
 
     - name: Generate application key
       run: php artisan key:generate
